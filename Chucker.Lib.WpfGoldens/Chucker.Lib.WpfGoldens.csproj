@@ -1,13 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
+        <TargetFramework>net9.0-windows</TargetFramework>
         <Nullable>enable</Nullable>
+        <UseWpf>true</UseWpf>
     </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="chucker-Microsoft.TestApi.Wpf" Version="1.0.0" />
       <PackageReference Include="Xunit.StaFact" Version="3.0.13" />
+      <PackageReference Include="xunit.v3.assert" Version="3.0.0" />
     </ItemGroup>
 
 </Project>
