@@ -4,6 +4,8 @@
         <TargetFramework>net9.0-windows</TargetFramework>
         <Nullable>enable</Nullable>
         <UseWpf>true</UseWpf>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Version>1.0.0-alpha1</Version>
     </PropertyGroup>
 
     <ItemGroup>
