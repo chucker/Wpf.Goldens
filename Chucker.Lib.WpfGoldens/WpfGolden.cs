@@ -75,7 +75,11 @@ public class WpfGolden
     /// will place test output near it. Call <see cref="Build"/> afterwards.
     /// </summary>
     public static WpfGolden FromCurrentTest([CallerFilePath] string callerFilePath = "", [CallerMemberName] string callerMemberName = "")
-        => new(GetFilenameBaseFromCurrentTest(callerFilePath, callerMemberName));
+    {
+        var callingAssembly = Assembly.GetCallingAssembly();
+
+        return new WpfGolden(GetFilenameBaseFromCurrentTest(callerFilePath, callerMemberName, callingAssembly));
+    }
 
     /// <summary>
     /// <para>
@@ -89,11 +93,13 @@ public class WpfGolden
     /// and turns that into <c>AboutBox_AboutBoxTests</c>.
     /// </para>
     /// </summary>
-    private static string GetFilenameBaseFromCurrentTest(string callerFilePath, string callerMemberName)
+    private static string GetFilenameBaseFromCurrentTest(string callerFilePath,
+        string callerMemberName,
+        Assembly callingAssembly)
     {
         var callerFilePathWithoutExtension = Path.ChangeExtension(callerFilePath, null);
 
-        var assemblyPath = Assembly.GetExecutingAssembly().Location;
+        var assemblyPath = callingAssembly.Location;
         var relativePath = new Uri(assemblyPath).MakeRelativeUri(new Uri(callerFilePathWithoutExtension));
 
         char[] charsToFilter = [.. Path.GetInvalidFileNameChars(), '.'];
