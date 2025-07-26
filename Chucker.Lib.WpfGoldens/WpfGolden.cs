@@ -48,23 +48,22 @@ file static class DirectoryInfoAncestorTraversalExtensions
 /// </summary>
 public class WpfGolden
 {
-    private const string _testOutputDirName = "TestOutput";
+    public string FilenameBase { get; }
 
-    public string FilenameBase { get; private set; }
+    public DirectoryInfo GoldensDir { get; }
+    public DirectoryInfo TestOutputDir { get; }
 
-    public DirectoryInfo TestOutputDir { get; } = GetTestOutputDir();
-    private static DirectoryInfo GetTestOutputDir([CallerFilePath] string callerFilePath = "")
-        => Directory.GetParent(callerFilePath)
-            .GetAncestorWithFileMatching("*.csproj")! // get ancestor containing the project
-            .CreateSubdirectory(_testOutputDirName);
-
-    public string OldPath => Path.Combine(TestOutputDir.FullName, $"{FilenameBase}.png");
-    public string NewPath => Path.Combine(TestOutputDir.FullName, $"{FilenameBase}_new.png");
+    public string OldPath => Path.Combine(GoldensDir.FullName, $"{FilenameBase}.png");
+    public string NewPath => Path.Combine(TestOutputDir.FullName, $"{FilenameBase}.png");
     public string DiffPath => Path.Combine(TestOutputDir.FullName, $"{FilenameBase}_diff.png");
 
-    private WpfGolden(string filenameBase)
+    private WpfGolden(string filenameBase,
+        DirectoryInfo goldensDir,
+        DirectoryInfo testOutputDir)
     {
         FilenameBase = filenameBase;
+        GoldensDir = goldensDir;
+        TestOutputDir = testOutputDir;
     }
 
     /// <summary>
@@ -99,10 +98,17 @@ public class WpfGolden
         //         .ToDictionary(x => x.First, x => x.Second);
         // }
 
-        return new WpfGolden(GetFilenameBaseFromCurrentTest(callerFilePath,
+        var parentDir = Directory.GetParent(callerFilePath)!;
+        var projectRoot = parentDir.GetAncestorWithFileMatching("*.csproj") ?? parentDir;
+
+        var filenameBase = GetFilenameBaseFromCurrentTest(callerFilePath,
             callerMemberName,
             callingAssembly,
-            args));
+            args);
+
+        return new WpfGolden(filenameBase,
+            projectRoot.CreateSubdirectory("Goldens"),
+            projectRoot.CreateSubdirectory("TestOutput"));
     }
 
     /// <summary>
