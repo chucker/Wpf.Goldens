@@ -1,0 +1,158 @@
+root = true
+
+[*]
+charset = utf-8
+# end_of_line = lf # disabled because of dotnet-format behavior
+indent_size = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+resharper_place_attribute_on_same_line = false
+
+[*.cs]
+csharp_style_namespace_declarations = file_scoped:warning
+
+# CSE005: Return value unused
+dotnet_diagnostic.CSE005.severity = warning
+
+# CSE007: Return disposable value unused
+dotnet_diagnostic.CSE007.severity = none # we only use CSE for 005 for now
+
+# CSE008: Return async result unused
+dotnet_diagnostic.CSE008.severity = none # we only use CSE for 005 for now
+
+[*.{cs,vb}proj]
+indent_size = 4
+
+[*.{cs,vb}]
+indent_style = space
+dotnet_separate_import_directive_groups = true
+dotnet_sort_system_directives_first = false
+
+# IDE0005: Using directive is unnecessary.
+dotnet_diagnostic.IDE0005.severity = warning
+
+## Naming
+
+# human-readable naming goals:
+#
+# MyNamespace
+# MyClass
+# MyStruct
+# IMyInterface
+# MyEnumValue
+# MyProperty
+# MyMethod
+# _myPrivateField
+# MyPublicField
+# MyEvent
+# MyDelegate
+# myParameter
+# TMyTypeParameter
+# myLocal
+# myLocalFunction
+
+# NOTES:
+# - there is no code fix for IDE1006 https://github.com/dotnet/format/issues/348)
+# - warning on locals would warn on tons of generated WinForms code
+#
+# Therefore, suggestion-only, at least until dotnet format supports this better
+
+# style groups
+dotnet_naming_style.pascal_case_style.capitalization = pascal_case
+dotnet_naming_style.i_prefixed_pascal_case_style.capitalization = pascal_case
+dotnet_naming_style.i_prefixed_pascal_case_style.required_prefix = I
+dotnet_naming_style.camel_case_style.capitalization = camel_case
+dotnet_naming_style.t_prefixed_pascal_case_style.capitalization = pascal_case
+dotnet_naming_style.t_prefixed_pascal_case_style.required_prefix = T
+dotnet_naming_style.underscore_prefixed_camel_case_style.capitalization = camel_case
+dotnet_naming_style.underscore_prefixed_camel_case_style.required_prefix = _
+
+# symbol groups
+dotnet_naming_symbols.public_symbols.applicable_kinds = namespace,class,struct,enum,property,method,event,delegate,parameter
+dotnet_naming_symbols.interface_symbols.applicable_kinds = interface
+dotnet_naming_symbols.public_field_symbols.applicable_kinds = field
+dotnet_naming_symbols.public_field_symbols.applicable_accessibilities = public
+dotnet_naming_symbols.private_field_symbols.applicable_kinds = field
+dotnet_naming_symbols.private_field_symbols.applicable_accessibilities = private
+dotnet_naming_symbols.type_parameter_symbols.applicable_kinds = type_parameter
+dotnet_naming_symbols.parameter_or_local_symbols.applicable_kinds = parameter,local,local_function
+
+# rule groups
+dotnet_naming_rule.public_symbols_as_pascal_case.symbols = public_symbols,public_field_symbols
+dotnet_naming_rule.public_symbols_as_pascal_case.style = pascal_case_style
+dotnet_naming_rule.public_symbols_as_pascal_case.severity = suggestion
+
+dotnet_naming_rule.interface_symbols_as_i_prefixed_pascal_case.symbols = interface_symbols
+dotnet_naming_rule.interface_symbols_as_i_prefixed_pascal_case.style = i_prefixed_pascal_case_style
+dotnet_naming_rule.interface_symbols_as_i_prefixed_pascal_case.severity = suggestion
+
+dotnet_naming_rule.type_parameter_symbols_as_t_prefixed_pascal_case.symbols = type_parameter_symbols
+dotnet_naming_rule.type_parameter_symbols_as_t_prefixed_pascal_case.style = t_prefixed_pascal_case_style
+dotnet_naming_rule.type_parameter_symbols_as_t_prefixed_pascal_case.severity = suggestion
+
+dotnet_naming_rule.parameters_and_locals_as_camel_case.symbols = parameter_or_local_symbols
+dotnet_naming_rule.parameters_and_locals_as_camel_case.style = camel_case_style
+dotnet_naming_rule.parameters_and_locals_as_camel_case.severity = suggestion
+
+dotnet_naming_rule.private_symbols_as_underscore_prefixed_camel_case.symbols = private_field_symbols
+dotnet_naming_rule.private_symbols_as_underscore_prefixed_camel_case.style = underscore_prefixed_camel_case_style
+dotnet_naming_rule.private_symbols_as_underscore_prefixed_camel_case.severity = suggestion
+
+## Compiler
+
+# BC42322: Runtime errors might occur when converting to or from interface type
+dotnet_diagnostic.BC42322.severity = error
+
+# BC42105: Function doesn't return a value on all code paths
+dotnet_diagnostic.BC42105.severity = error
+
+## Design
+
+# CA1051: Do not declare visible instance fields
+dotnet_diagnostic.CA1051.severity = warning
+
+## Performance
+
+# CA1822: Mark members as static
+dotnet_diagnostic.CA1822.severity = warning
+
+# CA1825: Avoid zero-length array allocations
+dotnet_diagnostic.CA1825.severity = warning
+
+# CA1827: Do not use Count() or LongCount() when Any() can be used
+dotnet_diagnostic.CA1827.severity = warning
+
+# CA1829: Use Length/Count property instead of Count() when available
+dotnet_diagnostic.CA1829.severity = warning
+
+## Style
+
+# IDE0065: Misplaced using directive
+dotnet_diagnostic.IDE0065.severity = none
+
+## Usage
+
+# CA2248: Provide correct 'enum' argument to 'Enum.HasFlag'
+dotnet_diagnostic.CA2248.severity = error
+
+# IDE0049: Simplify Names
+dotnet_diagnostic.IDE0049.severity = warning
+
+# IDE0051: Remove unused private member
+dotnet_diagnostic.IDE0051.severity = warning
+
+# IDE0081: 'ByVal' keyword is unnecessary and can be removed.
+dotnet_diagnostic.IDE0081.severity = warning
+
+dotnet_diagnostic.rcs0056.severity = suggestion
+roslynator_max_line_length = 120
+
+# StyleCop: Ordering Rules
+dotnet_diagnostic.SA1201.severity = warning        # Elements should appear in the correct order
+dotnet_diagnostic.SA1202.severity = warning        # Elements should be ordered by access
+dotnet_diagnostic.SA1203.severity = warning        # Constants should appear before fields
+dotnet_diagnostic.SA1204.severity = warning        # Static members should appear before non-static members
+dotnet_diagnostic.SA1214.severity = warning        # Readonly fields should appear before non-readonly fields
+
+dotnet_diagnostic.AsyncVoidAnalyzer.severity = warning
