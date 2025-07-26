@@ -22,7 +22,7 @@ file static class DirectoryInfoAncestorTraversalExtensions
 
             ancestor = ancestor.Parent;
         }
-        while (ancestor.Parent != ancestor.Root);
+        while (ancestor is not null && ancestor.Parent != ancestor.Root);
 
         return null;
     }
