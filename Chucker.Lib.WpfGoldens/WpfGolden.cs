@@ -30,8 +30,9 @@ file static class DirectoryInfoAncestorTraversalExtensions
 
 /// <summary>
 /// <para>
-/// Prepares a visual unit test that verifies a WPF view against a canonical
-/// snapshot. Will help you find out if the layout, colors, etc. unexpectedly.
+/// Prepares a visual unit test that verifies a WPF view (a window or control)
+/// against a canonical snapshot. Will help you find out if the layout, colors,
+/// etc. have unexpected changes.
 /// </para>
 ///
 /// <para>
@@ -41,7 +42,7 @@ file static class DirectoryInfoAncestorTraversalExtensions
 /// WpfGolden.FromCurrentTest()
 ///     .Build()
 ///     .WithSize(640, 480) // only needed if you don't want the default size
-///     .RenderWindow(window)
+///     .Render(window)
 ///     .AssertIsWithinTolerance(0); // increase if small variations are OK
 /// </code>
 /// </summary>
