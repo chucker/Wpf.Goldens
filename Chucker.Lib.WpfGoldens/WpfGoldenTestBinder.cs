@@ -1,0 +1,105 @@
+﻿using System;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text.RegularExpressions;
+
+using Xunit.v3;
+
+namespace Chucker.Lib.WpfGoldens;
+
+file static class DirectoryInfoAncestorTraversalExtensions
+{
+    public static DirectoryInfo? GetAncestorWithFileMatching(this DirectoryInfo descendant, string globPattern)
+    {
+        var ancestor = descendant;
+
+        do
+        {
+            if (ancestor.EnumerateFiles(globPattern).Any())
+                return ancestor;
+
+            ancestor = ancestor.Parent;
+        }
+        while (ancestor is not null && ancestor.Parent != ancestor.Root);
+
+        return null;
+    }
+}
+
+internal static class WpfGoldenTestBinder
+{
+    public static WpfGolden CreateGolden(string callerFilePath, string callerMemberName)
+    {
+        var callingAssembly = Assembly.GetCallingAssembly();
+
+        object?[] args;
+
+        if (Xunit.TestContext.Current.Test is XunitTest test)
+            args = test.TestMethodArguments;
+        else
+            args = [];
+
+        // LATER: for primitive types, we should add the param name
+        // Dictionary<ParameterInfo, object?>? args = null;
+        //
+        // if (Xunit.TestContext.Current.Test is XunitTest test &&
+        //     test.TestMethodArguments.Length != 0 &&
+        //     new StackFrame(1).GetMethod() is { } callerMethodInfo)
+        // {
+        //     args = callerMethodInfo.GetParameters().Zip(test.TestMethodArguments)
+        //         .ToDictionary(x => x.First, x => x.Second);
+        // }
+
+        var parentDir = Directory.GetParent(callerFilePath)!;
+        var projectRoot = parentDir.GetAncestorWithFileMatching("*.csproj") ?? parentDir;
+
+        var filenameBase = GetFilenameBaseFromCurrentTest(callerFilePath,
+            callerMemberName,
+            callingAssembly,
+            args);
+
+        return new WpfGolden(filenameBase,
+            projectRoot.CreateSubdirectory("Goldens"),
+            projectRoot.CreateSubdirectory("TestOutput"));
+    }
+
+
+    /// <summary>
+    /// <para>
+    /// Returns the path to the executing test, relative to the project base,
+    /// sanitized to have no invalid file name characters and no file
+    /// extension.
+    /// </para>
+    /// <para>
+    /// For example, takes
+    /// <c>C:\Users\someUser\source\repos\TRENZ\easyLogic\Client\EL.Client.WpfUi.Tests\AboutBox\AboutBoxTests.cs</c>
+    /// and turns that into <c>AboutBox_AboutBoxTests</c>.
+    /// </para>
+    /// </summary>
+    private static string GetFilenameBaseFromCurrentTest(string callerFilePath,
+        string callerMemberName,
+        Assembly callingAssembly,
+        object?[] callingMemberArgs)
+    {
+        var callerFilePathWithoutExtension = Path.ChangeExtension(callerFilePath, null);
+
+        var assemblyPath = callingAssembly.Location;
+        var relativePath = new Uri(assemblyPath).MakeRelativeUri(new Uri(callerFilePathWithoutExtension));
+
+        char[] charsToFilter = [.. Path.GetInvalidFileNameChars(), '.'];
+
+        var sanitizedFilePath = charsToFilter
+            .Aggregate(relativePath.OriginalString, (s, originalChar) => s.Replace(originalChar, '_'));
+
+        foreach (var arg in callingMemberArgs)
+            sanitizedFilePath += $"_{arg}";
+
+        // coalesce consecutive underscores
+        sanitizedFilePath = Regex.Replace(sanitizedFilePath, @"(_)\1+", "_");
+
+        sanitizedFilePath = sanitizedFilePath.TrimStart('_');
+
+        return $"{sanitizedFilePath}_{callerMemberName}";
+    }
+}
