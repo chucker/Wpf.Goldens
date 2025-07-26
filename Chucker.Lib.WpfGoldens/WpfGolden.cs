@@ -11,7 +11,7 @@ file static class DirectoryInfoAncestorTraversalExtensions
 {
     public static DirectoryInfo? GetAncestorWithFileMatching(this DirectoryInfo descendant, string globPattern)
     {
-        var ancestor = descendant.Parent;
+        var ancestor = descendant;
 
         do
         {
@@ -20,7 +20,7 @@ file static class DirectoryInfoAncestorTraversalExtensions
 
             ancestor = ancestor.Parent;
         }
-        while (descendant.Parent != descendant.Root);
+        while (ancestor.Parent != ancestor.Root);
 
         return null;
     }
