@@ -5,6 +5,8 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
+using Xunit.v3;
+
 namespace Chucker.Lib.WpfGoldens;
 
 file static class DirectoryInfoAncestorTraversalExtensions
@@ -78,7 +80,28 @@ public class WpfGolden
     {
         var callingAssembly = Assembly.GetCallingAssembly();
 
-        return new WpfGolden(GetFilenameBaseFromCurrentTest(callerFilePath, callerMemberName, callingAssembly));
+        object?[] args;
+
+        if (Xunit.TestContext.Current.Test is XunitTest test)
+            args = test.TestMethodArguments;
+        else
+            args = [];
+
+        // LATER: for primitive types, we should add the param name
+        // Dictionary<ParameterInfo, object?>? args = null;
+        //
+        // if (Xunit.TestContext.Current.Test is XunitTest test &&
+        //     test.TestMethodArguments.Length != 0 &&
+        //     new StackFrame(1).GetMethod() is { } callerMethodInfo)
+        // {
+        //     args = callerMethodInfo.GetParameters().Zip(test.TestMethodArguments)
+        //         .ToDictionary(x => x.First, x => x.Second);
+        // }
+
+        return new WpfGolden(GetFilenameBaseFromCurrentTest(callerFilePath,
+            callerMemberName,
+            callingAssembly,
+            args));
     }
 
     /// <summary>
@@ -95,7 +118,8 @@ public class WpfGolden
     /// </summary>
     private static string GetFilenameBaseFromCurrentTest(string callerFilePath,
         string callerMemberName,
-        Assembly callingAssembly)
+        Assembly callingAssembly,
+        object?[] callingMemberArgs)
     {
         var callerFilePathWithoutExtension = Path.ChangeExtension(callerFilePath, null);
 
@@ -106,6 +130,9 @@ public class WpfGolden
 
         var sanitizedFilePath = charsToFilter
             .Aggregate(relativePath.OriginalString, (s, originalChar) => s.Replace(originalChar, '_'));
+
+        foreach (var arg in callingMemberArgs)
+            sanitizedFilePath += $"_{arg}";
 
         // coalesce consecutive underscores
         sanitizedFilePath = Regex.Replace(sanitizedFilePath, @"(_)\1+", "_");
