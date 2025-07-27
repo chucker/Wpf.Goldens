@@ -97,14 +97,16 @@ internal class WpfGoldenTestBinder(string testFilePath, string testMemberName)
         var sanitizedFilePath = charsToFilter
             .Aggregate(relativePath.OriginalString, (s, originalChar) => s.Replace(originalChar, '_'));
 
+        var filenameBase = TestMemberName;
+
         foreach (var arg in callingMemberArgs)
-            sanitizedFilePath += $"_{arg}";
+            filenameBase += $"_{arg}";
 
         // coalesce consecutive underscores
         sanitizedFilePath = Regex.Replace(sanitizedFilePath, @"(_)\1+", "_");
 
         sanitizedFilePath = sanitizedFilePath.TrimStart('_');
 
-        return (sanitizedFilePath, TestMemberName);
+        return (sanitizedFilePath, filenameBase);
     }
 }

@@ -1,9 +1,21 @@
+using System.Collections.Generic;
+
 using Xunit;
 
 namespace Chucker.Lib.WpfGoldens.Tests;
 
 public class WpfGoldenTests
 {
+    public static IEnumerable<TheoryDataRow<string, int>> TestParameters
+    {
+        get
+        {
+            yield return new TheoryDataRow<string, int>("hello", 123);
+
+            yield return new TheoryDataRow<string, int>("", 0);
+        }
+    }
+
     [Fact]
     public void GoldensDirMatches_Fact()
     {
@@ -13,7 +25,7 @@ public class WpfGoldenTests
     }
 
     [Theory]
-    [InlineData("hello", 123)]
+    [MemberData(nameof(TestParameters))]
     public void GoldensDirMatches_Theory(string s, int i)
     {
         var golden = WpfGolden.FromCurrentTest();
@@ -30,7 +42,7 @@ public class WpfGoldenTests
     }
 
     [Theory]
-    [InlineData("hello", 123)]
+    [MemberData(nameof(TestParameters))]
     public void TestOutputDirMatches_Theory(string s, int i)
     {
         var golden = WpfGolden.FromCurrentTest();
@@ -43,19 +55,15 @@ public class WpfGoldenTests
     {
         var golden = WpfGolden.FromCurrentTest();
 
-        const string filenameBase = "FilenameBaseMatches";
-
-        Assert.EndsWith(filenameBase, golden.FilenameBase);
+        Assert.Equal(nameof(FilenameBaseMatches_Fact), golden.FilenameBase);
     }
 
     [Theory]
-    [InlineData("hello", 123)]
+    [MemberData(nameof(TestParameters))]
     public void FilenameBaseMatches_Theory(string s, int i)
     {
         var golden = WpfGolden.FromCurrentTest();
 
-        const string filenameBase = "FilenameBaseMatches";
-
-        Assert.EndsWith(filenameBase, golden.FilenameBase);
+        Assert.Equal($"{nameof(FilenameBaseMatches_Theory)}_{s}_{i}", golden.FilenameBase);
     }
 }
