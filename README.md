@@ -95,3 +95,11 @@ The intended approach here is:
 1. you check in the entire contents of `Goldens/`.
 2. you ignore `TestOutput/`.
 3. if a change to how a view is rendered is _intentional_, you copy the render output from `TestOutput/` to `Goldens/`, making the new version the new golden.
+
+## What about other frameworks?
+
+This is currently tightly coupled against Xunit and WPF.
+
+Adapting it for a different testing framework such as NUnit mainly involves porting `Xunit.StaFact`.
+
+Adapting it for a different UI framework probably wouldn't be too difficult.
