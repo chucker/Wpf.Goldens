@@ -38,22 +38,28 @@ When first run, this creates, in your tests project, these folders and files:
 ```
 MyProject.Tests
 - Goldens
--- AboutBox.png
+-- AboutBoxTests
+--- TestAboutBox.png
 - TestOutput
--- AboutBox.png
+-- AboutBoxTests
+--- TestAboutBox.png
 ```
 
 The two PNGs will be identical.
+
+Each test fixture gets its own folder underneath `Goldens` and `TestOutput` each, and each test method becomes the filename.
 
 When run a second time, you end up with a third file:
 
 ```
 MyProject.Tests
 - Goldens
--- AboutBox.png
+-- AboutBoxTests
+--- TestAboutBox.png
 - TestOutput
--- AboutBox.png
--- AboutBox_diff.png
+-- AboutBoxTests
+--- TestAboutBox.png
+--- TestAboutBox.diff.png
 ```
 
 In our example, the `diff` will be an all-black image the same size as the others. This means no pixel has changed.

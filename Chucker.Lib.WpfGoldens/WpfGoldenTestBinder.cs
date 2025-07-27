@@ -27,9 +27,12 @@ file static class DirectoryInfoAncestorTraversalExtensions
     }
 }
 
-internal static class WpfGoldenTestBinder
+internal class WpfGoldenTestBinder(string testFilePath, string testMemberName)
 {
-    public static WpfGolden CreateGolden(string callerFilePath, string callerMemberName)
+    private string TestFilePath { get; } = testFilePath;
+    private string TestMemberName { get; } = testMemberName;
+
+    public WpfGolden CreateGolden()
     {
         var callingAssembly = Assembly.GetCallingAssembly();
 
@@ -51,19 +54,23 @@ internal static class WpfGoldenTestBinder
         //         .ToDictionary(x => x.First, x => x.Second);
         // }
 
-        var parentDir = Directory.GetParent(callerFilePath)!;
+        var parentDir = Directory.GetParent(TestFilePath)!;
         var projectRoot = parentDir.GetAncestorWithFileMatching("*.csproj") ?? parentDir;
 
-        var filenameBase = GetFilenameBaseFromCurrentTest(callerFilePath,
-            callerMemberName,
-            callingAssembly,
-            args);
+        (string relativeDir, string filenameBase) = GetRelativePaths(callingAssembly, args);
+
+        var goldensSubdir = projectRoot
+            .CreateSubdirectory("Goldens")
+            .CreateSubdirectory(relativeDir);
+
+        var testOutputSubdir = projectRoot
+            .CreateSubdirectory("TestOutput")
+            .CreateSubdirectory(relativeDir);
 
         return new WpfGolden(filenameBase,
-            projectRoot.CreateSubdirectory("Goldens"),
-            projectRoot.CreateSubdirectory("TestOutput"));
+            goldensSubdir,
+            testOutputSubdir);
     }
-
 
     /// <summary>
     /// <para>
@@ -77,12 +84,10 @@ internal static class WpfGoldenTestBinder
     /// and turns that into <c>AboutBox_AboutBoxTests</c>.
     /// </para>
     /// </summary>
-    private static string GetFilenameBaseFromCurrentTest(string callerFilePath,
-        string callerMemberName,
-        Assembly callingAssembly,
-        object?[] callingMemberArgs)
+    private (string RelativeDir, string FilenameBase)
+        GetRelativePaths(Assembly callingAssembly, object?[] callingMemberArgs)
     {
-        var callerFilePathWithoutExtension = Path.ChangeExtension(callerFilePath, null);
+        var callerFilePathWithoutExtension = Path.ChangeExtension(TestFilePath, null);
 
         var assemblyPath = callingAssembly.Location;
         var relativePath = new Uri(assemblyPath).MakeRelativeUri(new Uri(callerFilePathWithoutExtension));
@@ -92,14 +97,16 @@ internal static class WpfGoldenTestBinder
         var sanitizedFilePath = charsToFilter
             .Aggregate(relativePath.OriginalString, (s, originalChar) => s.Replace(originalChar, '_'));
 
+        var filenameBase = TestMemberName;
+
         foreach (var arg in callingMemberArgs)
-            sanitizedFilePath += $"_{arg}";
+            filenameBase += $"_{arg}";
 
         // coalesce consecutive underscores
         sanitizedFilePath = Regex.Replace(sanitizedFilePath, @"(_)\1+", "_");
 
         sanitizedFilePath = sanitizedFilePath.TrimStart('_');
 
-        return $"{sanitizedFilePath}_{callerMemberName}";
+        return (sanitizedFilePath, filenameBase);
     }
 }
