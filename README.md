@@ -113,6 +113,48 @@ WpfGolden.FromCurrentTest()
 
 Now, if the differences in the image are only the "expected" (non-black) ones, the test will pass. The diff file will _still_ tell you what actual differences were found.
 
+### Parameterized Tests
+
+Tests can have parameters. For example, suppose our about box
+has a dark mode. We can test that it looks right in either light _or_ dark, by passing both:
+
+```csharp
+[WpfTheory]
+[InlineData(ApplicationTheme.Light)]
+[InlineData(ApplicationTheme.Dark)]
+public void TestAboutBox(ApplicationTheme theme)
+{
+    var window = new AboutBox();
+
+    window.Resources.MergedDictionaries.Add(new ControlsDictionary());
+    window.Resources.MergedDictionaries.Add(new ThemesDictionary { Theme = theme });
+
+…
+```
+
+We now end up with one test output per parameter:
+
+```
+MyProject.Tests
+- Goldens
+-- AboutBoxTests
+--- TestAboutBox_Dark.png
+--- TestAboutBox_Light.png
+- TestOutput
+-- AboutBoxTests
+--- TestAboutBox_Dark.png
+--- TestAboutBox_Dark.diff.png
+--- TestAboutBox_Light.png
+--- TestAboutBox_Light.diff.png
+```
+
+Here,
+
+- `MyProject.Tests` is the project root,
+- `AboutBoxTests` is the test fixture,
+- `TestAboutBox` is the test method, and
+- `_Dark` or `_Light` are the passed arguments.
+
 ## What about version control?
 
 The intended approach here is:
