@@ -3,6 +3,8 @@ using Microsoft.Test.VisualVerification;
 using System.IO;
 using System.Windows.Media.Imaging;
 
+using Gdi = System.Drawing;
+
 namespace Chucker.Lib.WpfGoldens;
 
 /// <summary>
@@ -12,9 +14,31 @@ namespace Chucker.Lib.WpfGoldens;
 /// </summary>
 public class WpfRenderedGolden(WpfGolden wpfGolden, BitmapFrame renderedFrame)
 {
-    public WpfGolden WpfGolden { get; } = wpfGolden;
+    private WpfGolden WpfGolden { get; } = wpfGolden;
 
-    public VerificationResult CompareToCanonical(byte tolerance)
+    public VerificationResult VerifyUniformColorDifference(byte tolerance)
+    {
+        if (SaveSnapshots(out var actual))
+            return VerificationResult.Pass;
+
+        var difference = CalculateDifference(actual);
+
+        var colorTolerance = new ColorDifference(tolerance, tolerance, tolerance, tolerance);
+        SnapshotVerifier v = new SnapshotColorVerifier(Gdi.Color.Black, colorTolerance);
+
+        return v.Verify(difference);
+    }
+
+    private Snapshot CalculateDifference(Snapshot actual)
+    {
+        var expected = Snapshot.FromFile(WpfGolden.OldPath);
+
+        var difference = actual.CompareTo(expected);
+        difference.ToFile(WpfGolden.DiffPath, Gdi.Imaging.ImageFormat.Png);
+        return difference;
+    }
+
+    private bool SaveSnapshots(out Snapshot actual)
     {
         var encoder = new PngBitmapEncoder()
         {
@@ -24,25 +48,15 @@ public class WpfRenderedGolden(WpfGolden wpfGolden, BitmapFrame renderedFrame)
         using (var stream = File.Create(WpfGolden.NewPath))
             encoder.Save(stream);
 
-        var actual = Snapshot.FromFile(WpfGolden.NewPath);
+        actual = Snapshot.FromFile(WpfGolden.NewPath);
 
         // on first run, the old path won't exist yet, so we'll simply do a no-op diff
         if (!File.Exists(WpfGolden.OldPath))
         {
             File.Copy(WpfGolden.NewPath, WpfGolden.OldPath);
-
-            // if there was nothing to compare to, assume success
-            return VerificationResult.Pass;
+            return true;
         }
 
-        var expected = Snapshot.FromFile(WpfGolden.OldPath);
-
-        var difference = actual.CompareTo(expected);
-        difference.ToFile(WpfGolden.DiffPath, System.Drawing.Imaging.ImageFormat.Png);
-
-        var colorTolerance = new ColorDifference(tolerance, tolerance, tolerance, tolerance);
-        SnapshotVerifier v = new SnapshotColorVerifier(System.Drawing.Color.Black, colorTolerance);
-
-        return v.Verify(difference);
+        return false;
     }
 }

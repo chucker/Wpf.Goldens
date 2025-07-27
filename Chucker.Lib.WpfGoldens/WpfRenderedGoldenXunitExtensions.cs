@@ -11,7 +11,7 @@ public static class WpfRenderedGoldenXunitExtensions
 {
     public static void AssertIsWithinTolerance(this WpfRenderedGolden renderedGolden, byte tolerance)
     {
-        var actual = renderedGolden.CompareToCanonical(tolerance);
+        var actual = renderedGolden.VerifyUniformColorDifference(tolerance);
         Assert.Equal(VerificationResult.Pass, actual);
     }
 }
