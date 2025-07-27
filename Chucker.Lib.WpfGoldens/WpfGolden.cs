@@ -30,7 +30,7 @@ public class WpfGolden
 
     public string OldPath => Path.Combine(GoldensDir.FullName, $"{FilenameBase}.png");
     public string NewPath => Path.Combine(TestOutputDir.FullName, $"{FilenameBase}.png");
-    public string DiffPath => Path.Combine(TestOutputDir.FullName, $"{FilenameBase}_diff.png");
+    public string DiffPath => Path.Combine(TestOutputDir.FullName, $"{FilenameBase}.diff.png");
 
     internal WpfGolden(string filenameBase,
         DirectoryInfo goldensDir,
