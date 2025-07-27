@@ -2,7 +2,7 @@
 
 **Wpf.Goldens** is a library for snapshot testing of WPF views (windows or controls).
 
-A **golden**[^1] is a rendered reference bitmap of what a view is supposed to look like. Running the same test again later on lets you find out if the view's layout, colors, etc. have unexpected changes. When a test is run, the library stores the inital image in a folder `Goldens/`, as a reference. Then when the test is run again subsequently, it creates another folder `TestOutput/`, containing the _new_ render, as well as a `diff` image showing you discrepancies, if any.
+A **golden**[^1] is a rendered reference bitmap of what a view is supposed to look like. Running the same test again later on lets you find out if the view's layout, colors, etc. have unexpected changes. When a test is initially run, the library stores a render. Then when the test is run again subsequently, it renders the same view again, and also calculates discrepancies, if any.
 
 [^1]: [based on Flutter's term](https://halesworth.org/snapshot-testing-with-flutter-golden/)
 
