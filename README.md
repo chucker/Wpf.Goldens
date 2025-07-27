@@ -105,7 +105,7 @@ WpfGolden.FromCurrentTest()
     .AssertIsWithinToleranceMap(toleranceMap);
 ```
 
-Now, if the differences in the image are only the "expected" ones, the test will pass.
+Now, if the differences in the image are only the "expected" (non-black) ones, the test will pass. The diff file will _still_ tell you what actual differences were found.
 
 ## What about version control?
 
