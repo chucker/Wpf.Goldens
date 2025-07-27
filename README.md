@@ -69,9 +69,9 @@ public void TestAboutBox()
 
     WpfGolden.FromCurrentTest() // determines file and folder paths based on the test
         .Build()
-        .WithSize(640, 480) // sizes our view
+        .WithSize(640, 480) // optionally sets explicit size for our view
         .Render(window)
-        .AssertIsWithinTolerance(0); // asserts zero differences
+        .AssertIsWithinTolerance(0); // asserts all pixels' colors differ by zero
 }
 ```
 
@@ -80,13 +80,32 @@ public void TestAboutBox()
 You can also:
 
 - increase the tolerance (on a scale from `0` to `255`),
-- for more complex scenarios, not call this method at all and instead use a custom `SnapshotColorVerifier`, `SnapshotHistogramVerifier`, or `SnapshotToleranceMapVerifier`.
+- directly call `renderedGolden.VerifyUniformColorDifference(0)` for different assertions
+- use `AssertIsWithinToleranceMap` for a `ToleranceMap` (see below)
+- for more complex scenarios, call `SnapshotColorVerifier`, `SnapshotHistogramVerifier`, or `SnapshotToleranceMapVerifier` yourself.
 
 A custom `SnapshotColorVerifier` is useful for when you want to tolerate more differences in one color channel than in another; our default implementation treats RGBA uniformly.
 
-A `SnapshotToleranceMapVerifier` is useful for scenarios where one portion of the view is varies highly, but everything else should always render the same. In our About Box example above, consider what happens if the box mentions the current version number in the bottom right. With a tolerance map, you'd increase the tolerance for that portion of the window.
+We don't provide helper methods for _all_ scenarios; see the implementation of `WpfRenderedGolden` and `WpfRenderedGoldenXunitExtensions` to get started for your own custom scenarios.
 
-We don't currently provide helper methods for those scenarios; see the implementation of `CompareToCanonical` to get started.
+### Tolerance Maps
+
+A `SnapshotToleranceMapVerifier` is useful for scenarios where one region of the view is varies highly, but everything else should always render the same.
+
+In our About Box example above, consider what happens if the box mentions the current version number in the bottom right. With a tolerance map, you'd increase the tolerance for that portion of the window.
+
+A tolerance map is a bitmap where black pixels mean no differences, and white pixels a complete difference. In the above, we can therefore use a bitmap that starts all black, but with a white (or grey) rectangle where the version number would be. We can then pass this as a resource:
+
+```csharp
+var toleranceMap = (System.Drawing.Bitmap)Image.FromFile("Resources/AboutBoxTests_ToleranceMap.png");
+
+WpfGolden.FromCurrentTest()
+    .Build()
+    .Render(window)
+    .AssertIsWithinToleranceMap(toleranceMap);
+```
+
+Now, if the differences in the image are only the "expected" ones, the test will pass.
 
 ## What about version control?
 
