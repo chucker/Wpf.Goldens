@@ -27,9 +27,12 @@ file static class DirectoryInfoAncestorTraversalExtensions
     }
 }
 
-internal static class WpfGoldenTestBinder
+internal class WpfGoldenTestBinder(string testFilePath, string testMemberName)
 {
-    public static WpfGolden CreateGolden(string callerFilePath, string callerMemberName)
+    private string TestFilePath { get; } = testFilePath;
+    private string TestMemberName { get; } = testMemberName;
+
+    public WpfGolden CreateGolden()
     {
         var callingAssembly = Assembly.GetCallingAssembly();
 
@@ -51,11 +54,11 @@ internal static class WpfGoldenTestBinder
         //         .ToDictionary(x => x.First, x => x.Second);
         // }
 
-        var parentDir = Directory.GetParent(callerFilePath)!;
+        var parentDir = Directory.GetParent(TestFilePath)!;
         var projectRoot = parentDir.GetAncestorWithFileMatching("*.csproj") ?? parentDir;
 
-        var filenameBase = GetFilenameBaseFromCurrentTest(callerFilePath,
-            callerMemberName,
+        var filenameBase = GetFilenameBaseFromCurrentTest(TestFilePath,
+            TestMemberName,
             callingAssembly,
             args);
 
@@ -63,7 +66,6 @@ internal static class WpfGoldenTestBinder
             projectRoot.CreateSubdirectory("Goldens"),
             projectRoot.CreateSubdirectory("TestOutput"));
     }
-
 
     /// <summary>
     /// <para>

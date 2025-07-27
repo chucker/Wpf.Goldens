@@ -54,6 +54,6 @@ public class WpfGolden
     public static WpfGolden FromCurrentTest([CallerFilePath] string callerFilePath = "",
         [CallerMemberName] string callerMemberName = "")
     {
-        return WpfGoldenTestBinder.CreateGolden(callerFilePath, callerMemberName);
+        return new WpfGoldenTestBinder(callerFilePath, callerMemberName).CreateGolden();
     }
 }
