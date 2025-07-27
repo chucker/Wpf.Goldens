@@ -2,6 +2,7 @@
   <Folder Name="/SolutionFolder/">
     <File Path=".editorconfig" />
   </Folder>
+  <Project Path="Chucker.Lib.WpfGoldens.Samples\Chucker.Lib.WpfGoldens.Samples.csproj" Type="Classic C#" />
   <Project Path="Chucker.Lib.WpfGoldens.Tests\Chucker.Lib.WpfGoldens.Tests.csproj" Type="Classic C#" />
   <Project Path="Chucker.Lib.WpfGoldens/Chucker.Lib.WpfGoldens.csproj" />
 </Solution>

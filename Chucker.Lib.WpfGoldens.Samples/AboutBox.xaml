@@ -1,0 +1,43 @@
+﻿<wpfui:FluentWindow
+    ExtendsContentIntoTitleBar="True"
+    Height="450"
+    Title="AboutBox"
+    Width="800"
+    mc:Ignorable="d"
+    x:Class="Chucker.Lib.WpfGoldens.Samples.AboutBox"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:wpfui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <wpfui:FluentWindow.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <wpfui:ControlsDictionary />
+                <wpfui:ThemesDictionary />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </wpfui:FluentWindow.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <wpfui:TitleBar
+            ShowMaximize="False"
+            ShowMinimize="False"
+            Title="About SampleApp" />
+
+        <StackPanel Grid.Row="1" Margin="30">
+            <wpfui:TextBlock FontTypography="Title">
+                SampleApp
+            </wpfui:TextBlock>
+
+            <wpfui:TextBlock FontTypography="Subtitle" x:Name="BuildTimestamp" />
+        </StackPanel>
+    </Grid>
+</wpfui:FluentWindow>
+
