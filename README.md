@@ -53,7 +53,7 @@ MyProject.Tests
 -- AboutBox.png
 - TestOutput
 -- AboutBox.png
--- AboutBox_diff.png
+-- AboutBox.diff.png
 ```
 
 In our example, the `diff` will be an all-black image the same size as the others. This means no pixel has changed.
