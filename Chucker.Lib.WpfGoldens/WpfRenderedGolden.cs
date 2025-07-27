@@ -29,6 +29,18 @@ public class WpfRenderedGolden(WpfGolden wpfGolden, BitmapFrame renderedFrame)
         return v.Verify(difference);
     }
 
+    public VerificationResult VerifyToleranceMapDifference(Gdi.Bitmap toleranceMap)
+    {
+        if (SaveSnapshots(out var actual))
+            return VerificationResult.Pass;
+
+        var difference = CalculateDifference(actual);
+
+        SnapshotVerifier v = new SnapshotToleranceMapVerifier(Snapshot.FromBitmap(toleranceMap));
+
+        return v.Verify(difference);
+    }
+
     private Snapshot CalculateDifference(Snapshot actual)
     {
         var expected = Snapshot.FromFile(WpfGolden.OldPath);
