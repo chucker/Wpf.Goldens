@@ -57,14 +57,19 @@ internal class WpfGoldenTestBinder(string testFilePath, string testMemberName)
         var parentDir = Directory.GetParent(TestFilePath)!;
         var projectRoot = parentDir.GetAncestorWithFileMatching("*.csproj") ?? parentDir;
 
-        var filenameBase = GetFilenameBaseFromCurrentTest(TestFilePath,
-            TestMemberName,
-            callingAssembly,
-            args);
+        (string relativeDir, string filenameBase) = GetRelativePaths(callingAssembly, args);
+
+        var goldensSubdir = projectRoot
+            .CreateSubdirectory("Goldens")
+            .CreateSubdirectory(relativeDir);
+
+        var testOutputSubdir = projectRoot
+            .CreateSubdirectory("TestOutput")
+            .CreateSubdirectory(relativeDir);
 
         return new WpfGolden(filenameBase,
-            projectRoot.CreateSubdirectory("Goldens"),
-            projectRoot.CreateSubdirectory("TestOutput"));
+            goldensSubdir,
+            testOutputSubdir);
     }
 
     /// <summary>
@@ -79,12 +84,10 @@ internal class WpfGoldenTestBinder(string testFilePath, string testMemberName)
     /// and turns that into <c>AboutBox_AboutBoxTests</c>.
     /// </para>
     /// </summary>
-    private static string GetFilenameBaseFromCurrentTest(string callerFilePath,
-        string callerMemberName,
-        Assembly callingAssembly,
-        object?[] callingMemberArgs)
+    private (string RelativeDir, string FilenameBase)
+        GetRelativePaths(Assembly callingAssembly, object?[] callingMemberArgs)
     {
-        var callerFilePathWithoutExtension = Path.ChangeExtension(callerFilePath, null);
+        var callerFilePathWithoutExtension = Path.ChangeExtension(TestFilePath, null);
 
         var assemblyPath = callingAssembly.Location;
         var relativePath = new Uri(assemblyPath).MakeRelativeUri(new Uri(callerFilePathWithoutExtension));
@@ -102,6 +105,6 @@ internal class WpfGoldenTestBinder(string testFilePath, string testMemberName)
 
         sanitizedFilePath = sanitizedFilePath.TrimStart('_');
 
-        return $"{sanitizedFilePath}_{callerMemberName}";
+        return (sanitizedFilePath, TestMemberName);
     }
 }
