@@ -155,7 +155,29 @@ Here,
 - `TestAboutBox` is the test method, and
 - `_Dark` or `_Light` are the passed arguments.
 
-## What about version control?
+## FAQ
+
+### Are there gotchas?
+
+A common issue is that WPF code isn't written to be thread-safe. In that case, when you run multiple goldens-based tests at the same time, you run into intermittent errors.
+
+For example, suppose a `Brush` is declared as `static`:
+
+```csharp
+public static SolidColorBrush Blue { get; } = new SolidColorBrush(Color.FromRgb(32, 64, 96));
+```
+
+If this is instantiated by the first test in thread A, then accessed by the second test in thread B, you may get an exception. Use the `[ThreadStatic]` attribute to avoid this:
+
+```csharp
+[ThreadStatic]
+private static SolidColorBrush? _blue;
+public static SolidColorBrush Blue => _blue ??= new(Color.FromRgb(32, 64, 96));
+```
+
+Now, each thread gets its own instance of the brush, allowing WPF to individually manage them.
+
+### What about version control?
 
 The intended approach here is:
 
@@ -163,7 +185,7 @@ The intended approach here is:
 2. you ignore `TestOutput/`.
 3. if a change to how a view is rendered is _intentional_, you copy the render output from `TestOutput/` to `Goldens/`, making the new version the new golden.
 
-## What about other frameworks?
+### What about other frameworks?
 
 This is currently tightly coupled against Xunit and WPF.
 
