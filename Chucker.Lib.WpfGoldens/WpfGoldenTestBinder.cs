@@ -2,7 +2,6 @@
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
 
 using Xunit.v3;
 
@@ -10,6 +9,17 @@ namespace Chucker.Lib.WpfGoldens;
 
 file static class DirectoryInfoAncestorTraversalExtensions
 {
+    /// <summary>
+    /// <para>
+    /// Finds an ancestor directory that contains a file matching the glob.
+    /// </para>
+    /// <para>
+    /// For example, given a path
+    /// <c>/Users/me/Projects/MyProject/Fancy/Subdir</c>, it may find
+    /// <c>/Users/me/Projects/MyProject/MyProject.csproj</c>, and therefore
+    /// return <c>/Users/me/Projects/MyProject</c>.
+    /// </para>
+    /// </summary>
     public static DirectoryInfo? GetAncestorWithFileMatching(this DirectoryInfo descendant, string globPattern)
     {
         var ancestor = descendant;
@@ -24,6 +34,29 @@ file static class DirectoryInfoAncestorTraversalExtensions
         while (ancestor is not null && ancestor.Parent != ancestor.Root);
 
         return null;
+    }
+}
+
+internal static class PathTraversalExtensions
+{
+    /// <summary>
+    /// <para>
+    /// Removes leading upwards navigation (typically <c>..\</c> on Windows or
+    /// <c>../</c> on Unix) from a relative path.
+    /// </para>
+    /// <para>
+    /// For example, turns
+    /// <c>../../some/fancy/path</c> into just <c>some/fancy/path</c>.
+    /// </para>
+    /// </summary>
+    public static string RemoveLeadingUpwardsNavigationFromRelativePath(this string path)
+    {
+        foreach (var separatorChar in new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar })
+        {
+            path = path.Replace($"..{separatorChar}", "");
+        }
+
+        return path;
     }
 }
 
@@ -57,15 +90,18 @@ internal class WpfGoldenTestBinder(string testFilePath, string testMemberName)
         var parentDir = Directory.GetParent(TestFilePath)!;
         var projectRoot = parentDir.GetAncestorWithFileMatching("*.csproj") ?? parentDir;
 
-        (string relativeDir, string filenameBase) = GetRelativePaths(callingAssembly, args);
+        (Uri relativePath, string filenameBase) = GetRelativePaths(callingAssembly, args);
+
+        string relativePathWithoutUpwardsNavigation =
+            relativePath.OriginalString.RemoveLeadingUpwardsNavigationFromRelativePath();
 
         var goldensSubdir = projectRoot
             .CreateSubdirectory("Goldens")
-            .CreateSubdirectory(relativeDir);
+            .CreateSubdirectory(relativePathWithoutUpwardsNavigation);
 
         var testOutputSubdir = projectRoot
             .CreateSubdirectory("TestOutput")
-            .CreateSubdirectory(relativeDir);
+            .CreateSubdirectory(relativePathWithoutUpwardsNavigation);
 
         return new WpfGolden(filenameBase,
             goldensSubdir,
@@ -84,7 +120,7 @@ internal class WpfGoldenTestBinder(string testFilePath, string testMemberName)
     /// and turns that into <c>AboutBox_AboutBoxTests</c>.
     /// </para>
     /// </summary>
-    private (string RelativeDir, string FilenameBase)
+    private (Uri RelativePath, string FilenameBase)
         GetRelativePaths(Assembly callingAssembly, object?[] callingMemberArgs)
     {
         var callerFilePathWithoutExtension = Path.ChangeExtension(TestFilePath, null);
@@ -92,21 +128,11 @@ internal class WpfGoldenTestBinder(string testFilePath, string testMemberName)
         var assemblyPath = callingAssembly.Location;
         var relativePath = new Uri(assemblyPath).MakeRelativeUri(new Uri(callerFilePathWithoutExtension));
 
-        char[] charsToFilter = [.. Path.GetInvalidFileNameChars(), '.'];
-
-        var sanitizedFilePath = charsToFilter
-            .Aggregate(relativePath.OriginalString, (s, originalChar) => s.Replace(originalChar, '_'));
-
         var filenameBase = TestMemberName;
 
         foreach (var arg in callingMemberArgs)
             filenameBase += $"_{arg}";
 
-        // coalesce consecutive underscores
-        sanitizedFilePath = Regex.Replace(sanitizedFilePath, @"(_)\1+", "_");
-
-        sanitizedFilePath = sanitizedFilePath.TrimStart('_');
-
-        return (sanitizedFilePath, filenameBase);
+        return (relativePath, filenameBase);
     }
 }

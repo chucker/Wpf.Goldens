@@ -7,6 +7,10 @@
         <UseWpf>true</UseWpf>
     </PropertyGroup>
 
+    <ItemGroup>
+        <InternalsVisibleTo Include="Chucker.Lib.WpfGoldens.Tests"/>
+    </ItemGroup>
+
     <PropertyGroup>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <IncludeSymbols>true</IncludeSymbols>
