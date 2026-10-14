@@ -70,7 +70,7 @@ public class WpfRenderedGolden(WpfGolden wpfGolden, BitmapFrame renderedFrame)
         // enabled (for example, by passing `-p:AllowUpdates=true`.
         if (!File.Exists(WpfGolden.OldPath) || GoldensConfiguration.AllowUpdates)
         {
-            File.Copy(WpfGolden.NewPath, WpfGolden.OldPath);
+            File.Copy(WpfGolden.NewPath, WpfGolden.OldPath, overwrite: true);
             return true;
         }
 
