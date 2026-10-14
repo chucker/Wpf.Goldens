@@ -9,21 +9,34 @@
         <UseWpf>true</UseWpf>
     </PropertyGroup>
 
+    <!-- these blocks aren't needed if you use PackageReference -->
+    <PropertyGroup>
+        <AllowUpdates Condition="'$(AllowUpdates)' == ''">false</AllowUpdates>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+            <_Parameter1>AllowUpdates</_Parameter1>
+            <_Parameter2>$(AllowUpdates)</_Parameter2>
+        </AssemblyAttribute>
+    </ItemGroup>
+
     <ItemGroup>
         <PackageReference Include="coverlet.collector" Version="6.0.2"/>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0"/>
-        <PackageReference Include="WPF-UI" Version="4.0.3" />
-        <PackageReference Include="xunit.v3" Version="3.0.0" />
+        <PackageReference Include="WPF-UI" Version="4.0.3"/>
+        <PackageReference Include="xunit.v3" Version="3.0.0"/>
+        <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Chucker.Lib.WpfGoldens\Chucker.Lib.WpfGoldens.csproj" />
+        <ProjectReference Include="..\Chucker.Lib.WpfGoldens\Chucker.Lib.WpfGoldens.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="Resources\*.png">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
+        <None Update="Resources\*.png">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
 </Project>
