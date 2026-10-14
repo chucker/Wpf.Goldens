@@ -9,6 +9,18 @@
         <UseWpf>true</UseWpf>
     </PropertyGroup>
 
+    <!-- these blocks aren't needed if you use PackageReference -->
+    <PropertyGroup>
+        <AllowUpdates Condition="'$(AllowUpdates)' == ''">false</AllowUpdates>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+            <_Parameter1>AllowUpdates</_Parameter1>
+            <_Parameter2>$(AllowUpdates)</_Parameter2>
+        </AssemblyAttribute>
+    </ItemGroup>
+
     <ItemGroup>
         <PackageReference Include="coverlet.collector" Version="6.0.2"/>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0"/>
