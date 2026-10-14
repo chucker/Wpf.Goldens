@@ -14,6 +14,9 @@ namespace Chucker.Lib.WpfGoldens;
 /// </summary>
 public class WpfRenderedGolden(WpfGolden wpfGolden, BitmapFrame renderedFrame)
 {
+    private WpfGoldensAssemblyConfiguration GoldensConfiguration { get; } =
+        WpfGoldensAssemblyConfiguration.ForTestAssembly();
+
     private WpfGolden WpfGolden { get; } = wpfGolden;
 
     public VerificationResult VerifyUniformColorDifference(byte tolerance)
@@ -62,8 +65,10 @@ public class WpfRenderedGolden(WpfGolden wpfGolden, BitmapFrame renderedFrame)
 
         actual = Snapshot.FromFile(WpfGolden.NewPath);
 
-        // on first run, the old path won't exist yet, so we'll simply do a no-op diff
-        if (!File.Exists(WpfGolden.OldPath))
+        // On first run, the old path won't exist yet, so we'll simply do a
+        // no-op diff. On subsequent runs, we only overwrite if AllowUpdates is
+        // enabled (for example, by passing `-p:AllowUpdates=true`.
+        if (!File.Exists(WpfGolden.OldPath) || GoldensConfiguration.AllowUpdates)
         {
             File.Copy(WpfGolden.NewPath, WpfGolden.OldPath);
             return true;
